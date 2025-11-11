@@ -18,30 +18,30 @@ int main( )
 	printf("**********生成C表 : *******************\n");
 	headC = create(); //建立链表C
 	printf("**********打印A表: **************\n");
-	print(headA);
+	Print(headA);
      printf("**********打印B表: ***************\n");
-	print(headB);
+	Print(headB);
      printf("**********打印C表: ***************\n");
-	print(headC);
+	Print(headC);
 	ListDelete(headA, headB, headC);  //调用删除函数
 	printf("********打印删除运算之后的A表: ***********\n");
-	print(headA);
+	Print(headA);
     return 0;
 }
 
 
 LinkList* create(){
-	Linklist *head = (Linklist*)malloc(sizeof(Linklist));
+	LinkList *head = (LinkList*)malloc(sizeof(LinkList));
 	head->next = NULL;
-	Linklist *p = head;
+	LinkList *p = head;
 	int x;
 	while(1){
-		sacnf("%d",&x);
+		scanf("%d",&x);
 		if(x==-1) break;
-		Linklist *new = (Linklist*)malloc(sizeof(Linklist));
-		new->data = x;
-		new->next = NULL;
-		p->next = new;
+		LinkList *newNode = (LinkList*)malloc(sizeof(LinkList));
+		newNode->data = x;
+		newNode->next = NULL;
+		p->next = newNode;
 		p = p->next;
 	} 
 	return head;
@@ -51,18 +51,18 @@ void ListDelete(LinkList * La, LinkList * Lb, LinkList *Lc){
 	
 }
 
-void Print(LinkList *){
-	Linklist *p = head->next;
+void Print(LinkList *head){
+	LinkList *p = head->next;
 	if(p==NULL){
-		printf("�ձ�");
+		printf("空表");
 		return; 
 	}
 	while(p!=NULL){
-		printf("%d",p->data)
+		printf("%d",p->data);
 		if(p->next!=NULL){
 			printf("->");
-			p = p->next;
 		}
-		printf("->NULL\n");
+		p = p->next;
 	}
+	printf("->NULL\n");
 }
