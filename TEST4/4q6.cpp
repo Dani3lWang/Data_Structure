@@ -1,115 +1,106 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <malloc.h>
 
-// 二叉树节点定义
-typedef struct TreeNode {
-    char val;
-    struct TreeNode* left;
-    struct TreeNode* right;
-} TreeNode;
+// 二叉树结点结构
+typedef struct BiTNode {
+    char data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
 
+// 栈元素结构
 typedef struct StackNode {
-    TreeNode* node;
-    int visited; 
+    BiTree treeNode;
+    int flag;
 } StackNode;
 
-#define STACK_SIZE 100
-typedef struct Stack {
-    StackNode data[STACK_SIZE];
+// 栈结构
+typedef struct {
+    StackNode data[100];
     int top;
 } Stack;
 
-void initStack(Stack* stack) {
-    stack->top = -1;
+// 初始化栈
+void InitStack(Stack *S) {
+    S->top = -1;
+}
+void Push(Stack *S, BiTree T, int flag) {
+    S->top++;
+    S->data[S->top].treeNode = T;
+    S->data[S->top].flag = flag;
+}
+StackNode Pop(Stack *S) {
+    return S->data[S->top--];
+}
+int StackEmpty(Stack *S) {
+    return S->top == -1;
 }
 
-int isStackEmpty(Stack* stack) {
-    return stack->top == -1;
-}
+// 后序遍历非递归算法
+void PostOrderTraverse(BiTree T) {
+    Stack S;
+    InitStack(&S);
+    BiTree p = T;
+    StackNode temp;
 
-int pushStack(Stack* stack, TreeNode* node, int visited) {
-    if (stack->top >= STACK_SIZE - 1) {
-        printf("栈溢出！\n");
-        return 0;
-    }
-    stack->top++;
-    stack->data[stack->top].node = node;
-    stack->data[stack->top].visited = visited;
-    return 1;
-}
+    printf("后序序列：");
+    while (p != NULL || !StackEmpty(&S)) {
+        while (p != NULL) {
+            Push(&S, p, 0);
+            p = p->lchild;
+        }
 
-StackNode popStack(Stack* stack) {
-    StackNode empty = {NULL, 0};
-    if (isStackEmpty(stack)) {
-        printf("栈空，无法出栈！\n");
-        return empty;
-    }
-    return stack->data[stack->top--];
-}
-
-int g_idx = 0;
-
-TreeNode* buildTreeRecursive(char* preorderArr[], int len) {
-    if (g_idx >= len || preorderArr[g_idx][0] == '#') {
-        g_idx++;
-        return NULL;
-    }
-    TreeNode* root = (TreeNode*)malloc(sizeof(TreeNode));
-    root->val = preorderArr[g_idx][0];
-    g_idx++; 
-    root->left = buildTreeRecursive(preorderArr, len);
-    root->right = buildTreeRecursive(preorderArr, len);
-
-    return root;
-}
-
-int parsePreorderInput(char* preorderArr[]) {
-    char inputStr[512];
-    printf("请输入二叉树的前序序列（节点用大写字母，#表示空节点，元素用空格分隔）：\n");
-    fgets(inputStr, sizeof(inputStr), stdin);
-    inputStr[strcspn(inputStr, "\n")] = '\0';
-    int count = 0;
-    char* token = strtok(inputStr, " ");
-    while (token != NULL && count < STACK_SIZE) {
-        preorderArr[count++] = token;
-        token = strtok(NULL, " ");
-    }
-    return count;
-}
-
-void postorderTraversalNonRecursive(TreeNode* root) {
-    if (root == NULL) {
-        printf("二叉树为空！\n");
-        return;
-    }
-
-    Stack stack;
-    initStack(&stack);
-    pushStack(&stack, root, 0);
-
-    printf("\n后序遍历结果：");
-    while (!isStackEmpty(&stack)) {
-        StackNode top = popStack(&stack);
-        TreeNode* curr = top.node;
-        int visited = top.visited;
-
-        if (visited == 0) {
-            pushStack(&stack, curr, 1);
-            if (curr->right != NULL) pushStack(&stack, curr->right, 0);
-            if (curr->left != NULL) pushStack(&stack, curr->left, 0);
-        } else {
-            printf("%c ", curr->val);
+        if (!StackEmpty(&S)) {
+            temp = Pop(&S);
+            if (temp.flag == 0) {
+                Push(&S, temp.treeNode, 1);
+                p = temp.treeNode->rchild;
+            } else {
+                printf("%c", temp.treeNode->data);
+                p = NULL;
+            }
         }
     }
     printf("\n");
 }
 
+// 中序遍历
+void InOrderTraverse(BiTree T) {
+    Stack S;
+    InitStack(&S);
+    BiTree p = T;
+
+    printf("Inorder:");
+    while (p != NULL || !StackEmpty(&S)) {
+        while (p != NULL) {
+            Push(&S, p, 0);
+            p = p->lchild;
+        }
+        if (!StackEmpty(&S)) {
+            p = Pop(&S).treeNode;
+            printf("%c", p->data);
+            p = p->rchild;
+        }
+    }
+    printf("\n");
+}
+
+void CreateBiTree(BiTree *T) {
+    char ch;
+    scanf(" %c", &ch);
+    if (ch == '#') {
+        *T = NULL;
+        return;
+    }
+    *T = (BiTree)malloc(sizeof(BiTNode));
+    (*T)->data = ch;
+    CreateBiTree(&(*T)->lchild);
+    CreateBiTree(&(*T)->rchild);
+}
+
 int main() {
-    char* preorderArr[STACK_SIZE];
-    int len = parsePreorderInput(preorderArr);
-    g_idx = 0;
-    TreeNode* root = buildTreeRecursive(preorderArr, len);
-    postorderTraversalNonRecursive(root);
+    BiTree T;
+    CreateBiTree(&T);
+    PostOrderTraverse(T);
+    InOrderTraverse(T);
     return 0;
 }
