@@ -19,7 +19,7 @@ int main()
    printf("***********显示原来的链表为：***************\n");
    print(head);
    printf("\n 输入i的值，i为偶数调用生成环函数，i为奇数则不调用：");
-   scanf_s("%d", &i);
+   scanf("%d", &i);
    if (i % 2 == 0)	
        Yescircle(head);//生成环函数
    x = judgecycle(head);//调用判断环是否存在的函数

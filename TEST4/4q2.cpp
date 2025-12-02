@@ -1,91 +1,103 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct LNode {
+typedef struct Linklist {
     int data;
-    struct LNode *next;
-} LNode, *LinkList;
+    struct Linklist* next;
+} Linklist;
 
-LinkList CreateList(int n); // 创建链表
-void PrintList(LinkList head); // 打印链表
-int maxTwinSum(LinkList head); // 求最大孪生和
-
-int main() {
-    int n;
-    scanf("%d", &n);
-    LinkList head = CreateList(n);
-    printf("原链表：");
-    PrintList(head);
-    int result = maxTwinSum(head);
-    printf("最大孪生和为：%d\n", result);
-    return 0;
+// 反转链表
+Linklist* reverseList(Linklist* head) {
+    Linklist* prev = NULL;
+    Linklist* curr = head;
+    Linklist* next_temp;
+    
+    while (curr != NULL) {
+        next_temp = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next_temp;
+    }
+    return prev;
 }
 
-LinkList CreateList() {
-    LinkList *head = (LinkList*)malloc(sizeof(LinkList));
-	head->next = NULL;
-	LinkList *p = head;
-	int x;
-	while(1){
-		scanf("%d",&x);
-		if(x==-1) break;
-		LinkList *newx = (LinkList*)malloc(sizeof(LinkList));
-		newx->data = x;
-		newx->next = NULL;
-		p->next = newx;
-		p = p->next;
-	} 
-	return head;
+// 计算最大孪生和
+int maxTwinSum(Linklist* head) {
+    if (head == NULL || head->next == NULL) {
+        return 0;
+    }
+    int n = 0;
+    Linklist* curr = head;
+    while (curr != NULL) {
+        n++;
+        curr = curr->next;
+    }
+    int mid = n / 2;
+    Linklist* half_start = head;
+    for (int i = 0; i < mid; i++) {
+        half_start = half_start->next;
+    }
+    
+    // 步骤3: 反转后半部分链表
+    Linklist* reversed_half = reverseList(half_start);
+    
+    // 步骤4: 计算最大孪生和
+    int max_sum = 0;
+    Linklist* first_half = head;
+    Linklist* second_half = reversed_half;
+    
+    for (int i = 0; i < mid; i++) {
+        int twin_sum = first_half->data + second_half->data;
+        if (twin_sum > max_sum) {
+            max_sum = twin_sum;
+        }
+        first_half = first_half->next;
+        second_half = second_half->next;
+    }
+    return max_sum;
 }
 
-void PrintList(LinkList head) {
-    LNode *p = head;
-    while (p != NULL) {
-        printf("%d ", p->data);
-        p = p->next;
+// 尾插法创建链表
+Linklist* createLinklist() {
+    Linklist *head = NULL, *tail = NULL, *p;
+    int x;
+    printf("请输入链表元素（-1结束）：");
+    while (scanf("%d", &x) == 1) {
+        if (x == -1) break;
+        p = (Linklist*)malloc(sizeof(Linklist));
+        if (p == NULL) return NULL;
+        p->data = x;
+        p->next = NULL;
+        if (head == NULL) {
+            head = tail = p;
+        } else {
+            tail->next = p;
+            tail = p;
+        }
+    }
+    return head;
+}
+
+void printList(Linklist* head) {
+    Linklist* curr = head;
+    while (curr != NULL) {
+        printf("%d", curr->data);
+        if (curr->next != NULL) {
+            printf(" -> ");
+        }
+        curr = curr->next;
     }
     printf("\n");
 }
 
-int maxTwinSum(LinkList head) {
-    if (!head || !head->next) return 0;
-    LNode *slow = head, *fast = head, *prev = NULL;
-    while (fast && fast->next) {
-        prev = slow;
-        slow = slow->next;
-        fast = fast->next->next;
-    }
-    prev->next = NULL;
-    LNode *second_half = slow;
-    LNode *prev_node = NULL, *next_node;
-    while (second_half) {
-        next_node = second_half->next;
-        second_half->next = prev_node;
-        prev_node = second_half;
-        second_half = next_node;
-    }
-    second_half = prev_node; 
-    LNode *first = head;
-    LNode *second = second_half;
-    int max_sum = 0;
-    while (first && second) {
-        int current_sum = first->data + second->data;
-        if (current_sum > max_sum) {
-            max_sum = current_sum;
-        }
-        first = first->next;
-        second = second->next;
-    }
-    prev_node = NULL;
-    LNode *current = second_half;
 
-    while (current) {
-        next_node = current->next;
-        current->next = prev_node;
-        prev_node = current;
-        current = next_node;
+int main() {
+    Linklist*head1 = createLinklist();
+    if (head1 == NULL) {
+        printf("链表为空\n");
+        return 0;
     }
-    prev->next = prev_node;
-
-    return max_sum;
+    printf("链表: ");
+    printList(head1);
+    printf("最大孪生和: %d\n", maxTwinSum(head1));
+    return 0;
 }
