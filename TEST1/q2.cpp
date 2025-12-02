@@ -15,7 +15,7 @@ linklist* create() {
     datatype x;
     printf("请输入字符链表：");
     while (1) {
-        scanf_s("%c", &x);
+        scanf("%c", &x);
         if (x == '\n') break;
         if (x == ' ') continue;
         linklist *newNode = (linklist*)malloc(sizeof(linklist));
